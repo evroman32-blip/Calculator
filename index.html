@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Бесплатные офлайн-калькуляторы: калорий для нормализации веса и семейного бюджета. Без регистрации, с тёмной темой и сохранением данных." />
+  <title>Вайб-калькуляторы — полезные инструменты для здоровья и финансов</title>
+
+  <script>
+    (function () {
+      if (localStorage.getItem("vibe_calculators_theme") === "dark") {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="assets/css/landing.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="logo" href="index.html">
+        <span class="logo__mark" aria-hidden="true">∑</span>
+        <span class="logo__text">Вайб-калькуляторы</span>
+      </a>
+      <nav class="topbar__nav" aria-label="Основная навигация">
+        <a href="#tools">Инструменты</a>
+        <a href="#how">Как это работает</a>
+        <a href="#features">Возможности</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__content">
+          <p class="hero__badge">Офлайн · Бесплатно · На русском</p>
+          <h1>Полезные калькуляторы для повседневных решений</h1>
+          <p class="hero__lead">
+            Добро пожаловать! Здесь собраны практичные веб-инструменты: рассчитайте калории
+            и питание или спланируйте семейный бюджет — всё работает прямо в браузере,
+            без установки и регистрации.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="apps/calorie-calculator/">Калькулятор калорий</a>
+            <a class="btn btn--secondary" href="apps/family-budget/">Семейный бюджет</a>
+          </div>
+          <ul class="hero__stats" aria-label="Ключевые характеристики">
+            <li><strong>2</strong><span>калькулятора</span></li>
+            <li><strong>0 ₽</strong><span>стоимость</span></li>
+            <li><strong>100%</strong><span>в браузере</span></li>
+          </ul>
+        </div>
+        <div class="hero__panel" aria-hidden="true">
+          <div class="hero__card hero__card--calories">
+            <span class="hero__card-label">Калории</span>
+            <strong>2 180</strong>
+            <span>ккал / день</span>
+          </div>
+          <div class="hero__card hero__card--macros">
+            <span>Б 165 · Ж 72 · У 210</span>
+          </div>
+          <div class="hero__card hero__card--budget">
+            <span class="hero__card-label">Бюджет</span>
+            <strong>+18 400 ₽</strong>
+            <span>свободный остаток</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tools" class="section">
+      <div class="container">
+        <div class="section__head">
+          <h2>Выберите инструмент</h2>
+          <p>Каждый калькулятор — отдельное приложение с сохранением данных и экспортом отчёта.</p>
+        </div>
+
+        <div class="tools-grid">
+          <article class="tool-card">
+            <div class="tool-card__icon tool-card__icon--green" aria-hidden="true">🥗</div>
+            <h3>Калькулятор калорий</h3>
+            <p>
+              Расчёт базового обмена, суточной нормы калорий, БЖУ, примерного меню,
+              витаминов и осторожных рекомендаций по добавкам для взрослого мужчины.
+            </p>
+            <ul class="tool-card__tags">
+              <li>Формула Миффлина — Сан Жеора</li>
+              <li>База продуктов</li>
+              <li>Генератор меню</li>
+            </ul>
+            <a class="btn btn--primary btn--block" href="apps/calorie-calculator/">Открыть калькулятор</a>
+          </article>
+
+          <article class="tool-card">
+            <div class="tool-card__icon tool-card__icon--blue" aria-hidden="true">💰</div>
+            <h3>Семейный бюджет</h3>
+            <p>
+              Планирование доходов и расходов семьи: обязательные и переменные траты,
+              накопления, финансовые цели и оценка устойчивости бюджета.
+            </p>
+            <ul class="tool-card__tags">
+              <li>Доходы и расходы</li>
+              <li>Цели накоплений</li>
+              <li>Экспорт JSON</li>
+            </ul>
+            <a class="btn btn--primary btn--block" href="apps/family-budget/">Открыть калькулятор</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="section section--soft">
+      <div class="container">
+        <div class="section__head">
+          <h2>Как это работает</h2>
+          <p>Три шага — и результат готов. Никаких аккаунтов и сложных настроек.</p>
+        </div>
+
+        <ol class="steps">
+          <li class="step">
+            <span class="step__num">1</span>
+            <h3>Выберите калькулятор</h3>
+            <p>Откройте нужный инструмент из списка выше — страница загрузится мгновенно.</p>
+          </li>
+          <li class="step">
+            <span class="step__num">2</span>
+            <h3>Введите свои данные</h3>
+            <p>Заполните параметры: вес, активность, доходы или расходы — расчёт обновляется сразу.</p>
+          </li>
+          <li class="step">
+            <span class="step__num">3</span>
+            <h3>Сохраните результат</h3>
+            <p>Данные хранятся в браузере. При необходимости экспортируйте отчёт в JSON.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="container">
+        <div class="section__head">
+          <h2>Почему удобно</h2>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature">
+            <h3>Работает офлайн</h3>
+            <p>После первой загрузки калькуляторы доступны без интернета — всё в одном HTML-файле.</p>
+          </div>
+          <div class="feature">
+            <h3>Тёмная тема</h3>
+            <p>Переключатель в углу экрана. Выбор темы запоминается между визитами.</p>
+          </div>
+          <div class="feature">
+            <h3>Локальное хранение</h3>
+            <p>Ваши данные остаются в браузере и не отправляются на сервер.</p>
+          </div>
+          <div class="feature">
+            <h3>Открытый код</h3>
+            <p>Проект можно развернуть на GitHub Pages или открыть локально — достаточно браузера.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="container cta__inner">
+        <div>
+          <h2>Начните с того, что важнее сейчас</h2>
+          <p>Оба инструмента бесплатны и не требуют регистрации.</p>
+        </div>
+        <div class="cta__actions">
+          <a class="btn btn--light" href="apps/calorie-calculator/">Здоровье и питание</a>
+          <a class="btn btn--light-outline" href="apps/family-budget/">Финансы семьи</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>© 2026 Вайб-калькуляторы. Информационные инструменты, не заменяющие врача или финансового консультанта.</p>
+      <p class="footer__note">Проект создан в рамках вайб-кодинга — простые и полезные веб-приложения.</p>
+    </div>
+  </footer>
+
+  <button
+    id="themeToggle"
+    class="theme-toggle"
+    type="button"
+    aria-label="Переключить тему"
+    title="Переключить тему"
+  >
+    <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="5"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>
+  </button>
+
+  <script src="assets/js/landing.js"></script>
+</body>
+</html>

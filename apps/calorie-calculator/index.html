@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Калькулятор калорий для взрослого мужчины</title>
+
+  <!--
+    Раннее применение сохранённой темы (до отрисовки страницы).
+    Убирает «мигание» светлой темы, если пользователь выбрал тёмную.
+  -->
+  <script>
+    (function () {
+      if (localStorage.getItem("vibe_calculators_theme") === "dark") {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+
+  <style>
+    /*
+      ============================================================
+      КАЛЬКУЛЯТОР КАЛОРИЙ ДЛЯ НОРМАЛИЗАЦИИ ВЕСА ВЗРОСЛОГО МУЖЧИНЫ
+      ============================================================
+
+      Назначение:
+      - рассчитать базовый обмен веществ;
+      - рассчитать суточную норму калорий;
+      - подобрать калораж для похудения, удержания или набора веса;
+      - рассчитать белки, жиры и углеводы;
+      - составить примерное меню;
+      - показать ориентировочные нормы витаминов и микроэлементов;
+      - дать рекомендации по возможным БАДам без медицинского назначения.
+
+      Важно:
+      Это не медицинское приложение.
+      Оно не заменяет врача, диетолога, анализы крови и клиническую диагностику.
+
+      Ограничение:
+      Офлайн HTML-файл не может знать все продукты мира.
+      Поэтому внутри кода есть расширяемая база продуктов.
+      Пользователь может добавлять свои продукты вручную.
+    */
+
+    /*
+      ============================================================
+      СВЕТЛАЯ ТЕМА (по умолчанию)
+      Все цвета вынесены в CSS-переменные — так проще переключать тему.
+      ============================================================
+    */
+    :root {
+      --bg: #f3f5f7;
+      --card: #ffffff;
+      --text: #1f2933;
+      --muted: #6b7280;
+      --label: #374151;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --border: #e5e7eb;
+      --soft-blue: #eff6ff;
+      --soft-green: #ecfdf5;
+      --soft-orange: #fff7ed;
+      --soft-red: #fef2f2;
+      --input-bg: #ffffff;
+      --metric-bg: #f9fafb;
+      --macro-bg: #ffffff;
+      --table-head-bg: #fafafa;
+      --meal-bg: #ffffff;
+      --btn-secondary-bg: #e5e7eb;
+      --btn-secondary-text: #111827;
+      --btn-secondary-hover: #d1d5db;
+      --pill-bg: #eef2ff;
+      --pill-text: #3730a3;
+      --focus-ring: rgba(37, 99, 235, 0.14);
+      --notice-bg: #fff7ed;
+      --notice-border: #fed7aa;
+      --notice-text: #7c2d12;
+      --danger-box-border: #fecaca;
+      --danger-box-text: #7f1d1d;
+      --success-box-border: #bbf7d0;
+      --success-box-text: #14532d;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --header-from: #111827;
+      --header-to: #1d4ed8;
+      --theme-toggle-bg: #ffffff;
+      --theme-toggle-border: #e5e7eb;
+      --theme-toggle-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+      --radius: 18px;
+    }
+
+    /*
+      ============================================================
+      ТЁМНАЯ ТЕМА
+      Активируется атрибутом data-theme="dark" на элементе <html>.
+      ============================================================
+    */
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --label: #cbd5e1;
+      --accent: #3b82f6;
+      --accent-dark: #2563eb;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --border: #334155;
+      --soft-blue: #172554;
+      --soft-green: #052e16;
+      --soft-orange: #431407;
+      --soft-red: #450a0a;
+      --input-bg: #0f172a;
+      --metric-bg: #162032;
+      --macro-bg: #162032;
+      --table-head-bg: #162032;
+      --meal-bg: #162032;
+      --btn-secondary-bg: #334155;
+      --btn-secondary-text: #e2e8f0;
+      --btn-secondary-hover: #475569;
+      --pill-bg: #312e81;
+      --pill-text: #c7d2fe;
+      --focus-ring: rgba(59, 130, 246, 0.25);
+      --notice-bg: #431407;
+      --notice-border: #9a3412;
+      --notice-text: #fed7aa;
+      --danger-box-border: #991b1b;
+      --danger-box-text: #fecaca;
+      --success-box-border: #166534;
+      --success-box-text: #bbf7d0;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      --header-from: #020617;
+      --header-to: #1e40af;
+      --theme-toggle-bg: #1e293b;
+      --theme-toggle-border: #334155;
+      --theme-toggle-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      /* Плавная смена фона и текста при переключении темы */
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .page {
+      max-width: 1350px;
+      margin: 0 auto;
+      padding: 26px 16px 60px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--header-from), var(--header-to));
+      color: #fff;
+      padding: 32px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: 32px;
+      line-height: 1.18;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 980px;
+      color: rgba(255,255,255,0.88);
+      font-size: 16px;
+    }
+
+    .notice {
+      background: var(--notice-bg);
+      border: 1px solid var(--notice-border);
+      color: var(--notice-text);
+      padding: 16px 18px;
+      border-radius: 16px;
+      margin-bottom: 22px;
+      font-size: 14px;
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 20px;
+      transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    .card h3 {
+      margin: 16px 0 10px;
+      font-size: 17px;
+    }
+
+    .description {
+      color: var(--muted);
+      font-size: 14px;
+      margin: -4px 0 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    @media (max-width: 680px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--label);
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 13px;
+      font-size: 15px;
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease, background 0.25s ease, color 0.25s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 11px 15px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dark);
+    }
+
+    .btn-secondary {
+      background: var(--btn-secondary-bg);
+      color: var(--btn-secondary-text);
+    }
+
+    .btn-secondary:hover {
+      background: var(--btn-secondary-hover);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-small {
+      padding: 9px 11px;
+      font-size: 13px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 680px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .metric {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--metric-bg);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .metric.blue {
+      background: var(--soft-blue);
+    }
+
+    .metric.green {
+      background: var(--soft-green);
+    }
+
+    .metric.orange {
+      background: var(--soft-orange);
+    }
+
+    .metric.red {
+      background: var(--soft-red);
+    }
+
+    .metric-title {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 24px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .metric-note {
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .macro-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 680px) {
+      .macro-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .macro {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      background: var(--macro-bg);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .macro strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .macro span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      padding: 10px 7px;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--table-head-bg);
+      transition: background 0.25s ease;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--pill-bg);
+      color: var(--pill-text);
+      font-size: 12px;
+      font-weight: 700;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .good {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .bad {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .warn {
+      color: var(--warning);
+      font-weight: 700;
+    }
+
+    .menu-day {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+
+    .meal {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--meal-bg);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .meal:last-child {
+      border-bottom: none;
+    }
+
+    .meal-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+
+    .meal ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+    }
+
+    .meal li {
+      margin-bottom: 4px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .custom-food-grid {
+      display: grid;
+      grid-template-columns: 1.2fr repeat(4, 0.7fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    @media (max-width: 900px) {
+      .custom-food-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .sticky {
+      position: sticky;
+      top: 16px;
+    }
+
+    @media (max-width: 980px) {
+      .sticky {
+        position: static;
+      }
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 680px) {
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .footer {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 18px;
+    }
+
+    .danger-box {
+      background: var(--soft-red);
+      border: 1px solid var(--danger-box-border);
+      color: var(--danger-box-text);
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      margin-top: 14px;
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    .success-box {
+      background: var(--soft-green);
+      border: 1px solid var(--success-box-border);
+      color: var(--success-box-text);
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      margin-top: 14px;
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    .small {
+      font-size: 12px;
+    }
+
+    /*
+      ============================================================
+      КНОПКА ПЕРЕКЛЮЧЕНИЯ ТЕМЫ
+      Закреплена в правом нижнем углу экрана (fixed).
+      Не прокручивается вместе со страницей.
+      ============================================================
+    */
+    .theme-toggle {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 1000;
+      width: 52px;
+      height: 52px;
+      border: 1px solid var(--theme-toggle-border);
+      border-radius: 50%;
+      background: var(--theme-toggle-bg);
+      color: var(--text);
+      box-shadow: var(--theme-toggle-shadow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.06);
+    }
+
+    .theme-toggle:active {
+      transform: scale(0.96);
+    }
+
+    /* Иконки солнца и луны: показываем только нужную для текущей темы */
+    .theme-toggle__icon {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    /* Светлая тема: показываем луну (переключить на тёмную) */
+    .theme-toggle__icon--sun {
+      display: none;
+    }
+
+    /* Тёмная тема: показываем солнце (переключить на светлую) */
+    [data-theme="dark"] .theme-toggle__icon--sun {
+      display: block;
+    }
+
+    [data-theme="dark"] .theme-toggle__icon--moon {
+      display: none;
+    }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .site-nav__inner {
+      max-width: 1350px;
+      margin: 0 auto;
+      padding: 12px 16px;
+    }
+
+    .site-nav__link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .site-nav__link:hover {
+      color: var(--accent-dark);
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="site-nav" aria-label="Навигация по сайту">
+    <div class="site-nav__inner">
+      <a class="site-nav__link" href="../../index.html">← На главную</a>
+    </div>
+  </nav>
+
+  <main class="page">
+    <header class="hero">
+      <h1>Калькулятор калорий для нормализации веса взрослого мужчины</h1>
+      <p>
+        Расчёт суточной калорийности, белков, жиров, углеводов, примерного меню,
+        витаминов, минералов и осторожных рекомендаций по добавкам.
+      </p>
+    </header>
+
+    <div class="notice">
+      <strong>Важно:</strong> калькулятор предназначен только для взрослых мужчин.
+      Он не ставит диагнозы, не лечит ожирение, дефициты, диабет, болезни ЖКТ, почек, печени или сердца.
+      БАДы и витамины нельзя принимать вслепую: корректный путь — питание, анализы, врачебная оценка.
+    </div>
+
+    <div class="layout">
+      <!-- ЛЕВАЯ ЧАСТЬ -->
+      <section>
+        <div class="card">
+          <h2>1. Данные мужчины</h2>
+          <p class="description">
+            На основании этих данных рассчитывается базовый обмен, индекс массы тела и целевой калораж.
+          </p>
+
+          <div class="form-grid">
+            <div>
+              <label for="age">Возраст, лет</label>
+              <input id="age" type="number" min="18" max="100" value="52" />
+            </div>
+
+            <div>
+              <label for="height">Рост, см</label>
+              <input id="height" type="number" min="120" max="230" value="180" />
+            </div>
+
+            <div>
+              <label for="weight">Текущий вес, кг</label>
+              <input id="weight" type="number" min="40" max="250" step="0.1" value="107" />
+            </div>
+
+            <div>
+              <label for="targetWeight">Желаемый вес, кг</label>
+              <input id="targetWeight" type="number" min="40" max="250" step="0.1" value="90" />
+            </div>
+
+            <div>
+              <label for="activity">Физическая активность</label>
+              <select id="activity">
+                <option value="1.2">Минимальная: сидячая работа, без тренировок</option>
+                <option value="1.375">Низкая: 1–3 лёгкие тренировки в неделю</option>
+                <option value="1.55">Средняя: 3–5 тренировок в неделю</option>
+                <option value="1.725">Высокая: 6–7 тренировок в неделю</option>
+                <option value="1.9">Очень высокая: физический труд + спорт</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="goal">Цель</label>
+              <select id="goal">
+                <option value="loss">Похудение / снижение жировой массы</option>
+                <option value="maintain">Удержание веса</option>
+                <option value="gain">Набор массы</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="speed">Скорость изменения веса</label>
+              <select id="speed">
+                <option value="mild">Мягко</option>
+                <option value="normal" selected>Оптимально</option>
+                <option value="aggressive">Жёстко, но без экстремального режима</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="mealsCount">Количество приёмов пищи</label>
+              <select id="mealsCount">
+                <option value="3">3 приёма</option>
+                <option value="4" selected>4 приёма</option>
+                <option value="5">5 приёмов</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-primary" onclick="calculateAll()">Рассчитать</button>
+            <button class="btn btn-secondary" onclick="saveState()">Сохранить</button>
+            <button class="btn btn-secondary" onclick="loadState()">Загрузить</button>
+            <button class="btn btn-danger" onclick="resetAll()">Сбросить</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>2. Настройка рациона</h2>
+          <p class="description">
+            Выберите стиль питания. Меню будет собрано из продуктов встроенной базы.
+          </p>
+
+          <div class="form-grid">
+            <div>
+              <label for="dietStyle">Стиль питания</label>
+              <select id="dietStyle">
+                <option value="balanced">Сбалансированный рацион</option>
+                <option value="highProtein">Повышенный белок</option>
+                <option value="lowerCarb">Умеренно сниженные углеводы</option>
+                <option value="budget">Простой бюджетный рацион</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="exclude">Исключить продукты</label>
+              <select id="exclude">
+                <option value="none">Ничего не исключать</option>
+                <option value="noPork">Без свинины</option>
+                <option value="noDairy">Без молочных продуктов</option>
+                <option value="noFish">Без рыбы</option>
+                <option value="noGluten">Без глютена</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="btn btn-primary" onclick="generateMenu()">Составить меню</button>
+            <button class="btn btn-secondary" onclick="exportReport()">Экспорт отчёта JSON</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>3. Добавить свой продукт</h2>
+          <p class="description">
+            Если продукта нет в базе, добавьте его вручную. Значения указываются на 100 г продукта.
+          </p>
+
+          <div class="custom-food-grid">
+            <div>
+              <label for="customName">Название</label>
+              <input id="customName" type="text" placeholder="Например: бедро индейки" />
+            </div>
+
+            <div>
+              <label for="customKcal">Ккал</label>
+              <input id="customKcal" type="number" min="0" value="150" />
+            </div>
+
+            <div>
+              <label for="customProtein">Белки</label>
+              <input id="customProtein" type="number" min="0" step="0.1" value="20" />
+            </div>
+
+            <div>
+              <label for="customFat">Жиры</label>
+              <input id="customFat" type="number" min="0" step="0.1" value="7" />
+            </div>
+
+            <div>
+              <label for="customCarbs">Углеводы</label>
+              <input id="customCarbs" type="number" min="0" step="0.1" value="0" />
+            </div>
+
+            <button class="btn btn-primary" onclick="addCustomFood()">Добавить</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>4. База продуктов</h2>
+          <p class="description">
+            Это не вся мировая база продуктов, а встроенный справочник. Его можно расширять.
+          </p>
+
+          <div class="search-row">
+            <input id="foodSearch" type="text" placeholder="Поиск продукта..." oninput="renderFoodTable()" />
+            <select id="foodCategoryFilter" onchange="renderFoodTable()">
+              <option value="all">Все категории</option>
+              <option value="protein">Белковые продукты</option>
+              <option value="carb">Углеводные продукты</option>
+              <option value="fat">Жиры</option>
+              <option value="vegetable">Овощи</option>
+              <option value="fruit">Фрукты</option>
+              <option value="dairy">Молочные продукты</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Продукт</th>
+                  <th>Категория</th>
+                  <th>Ккал</th>
+                  <th>Б</th>
+                  <th>Ж</th>
+                  <th>У</th>
+                </tr>
+              </thead>
+              <tbody id="foodTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ПРАВАЯ ЧАСТЬ -->
+      <aside>
+        <div class="card sticky">
+          <h2>Итоговый расчёт</h2>
+
+          <div class="summary-grid">
+            <div class="metric blue">
+              <div class="metric-title">BMR / базовый обмен</div>
+              <div id="bmrResult" class="metric-value">—</div>
+              <div class="metric-note">Mifflin–St Jeor для мужчин</div>
+            </div>
+
+            <div class="metric green">
+              <div class="metric-title">TDEE / поддержание</div>
+              <div id="tdeeResult" class="metric-value">—</div>
+              <div class="metric-note">BMR × активность</div>
+            </div>
+
+            <div class="metric orange">
+              <div class="metric-title">Целевой калораж</div>
+              <div id="targetCaloriesResult" class="metric-value">—</div>
+              <div class="metric-note">Под выбранную цель</div>
+            </div>
+
+            <div class="metric">
+              <div class="metric-title">Индекс массы тела</div>
+              <div id="bmiResult" class="metric-value">—</div>
+              <div id="bmiText" class="metric-note">—</div>
+            </div>
+          </div>
+
+          <h3>Белки / жиры / углеводы</h3>
+
+          <div class="macro-grid">
+            <div class="macro">
+              <strong id="proteinResult">—</strong>
+              <span>Белки, г/сутки</span>
+            </div>
+            <div class="macro">
+              <strong id="fatResult">—</strong>
+              <span>Жиры, г/сутки</span>
+            </div>
+            <div class="macro">
+              <strong id="carbResult">—</strong>
+              <span>Углеводы, г/сутки</span>
+            </div>
+          </div>
+
+          <div id="mainRecommendation" class="success-box">
+            Введите данные и нажмите «Рассчитать».
+          </div>
+
+          <div class="footer">
+            Расчёт является ориентировочным. При ожирении, гипертонии, диабете, заболеваниях ЖКТ,
+            печени, почек, сердца или приёме лекарств рацион необходимо согласовать со специалистом.
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="card">
+      <h2>Оптимальное меню на день</h2>
+      <p class="description">
+        Меню автоматически подбирается под целевой калораж и БЖУ. Это рабочий пример, а не медицинское назначение.
+      </p>
+      <div id="menuOutput" class="menu-day">
+        <div class="meal">
+          Нажмите «Составить меню».
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Витамины, минералы и возможные добавки</h2>
+      <p class="description">
+        Таблица показывает ориентировочные нормы для взрослого мужчины. Рекомендации по БАДам являются информационными.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Нутриент</th>
+              <th>Ориентир в сутки</th>
+              <th>Зачем нужен</th>
+              <th>Пищевые источники</th>
+              <th>Когда обсуждать БАД</th>
+            </tr>
+          </thead>
+          <tbody id="nutrientTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="danger-box">
+        <strong>Жёсткое правило:</strong> железо, витамин D в высоких дозах, витамин A, йод, селен, цинк,
+        магний в лечебных дозировках, омега-3 при антикоагулянтах и любые «жиросжигатели» нельзя принимать
+        автоматически. Сначала питание, затем анализы и врачебная оценка.
+      </div>
+    </section>
+  </main>
+
+  <!--
+    ============================================================
+    КНОПКА ПЕРЕКЛЮЧЕНИЯ ТЕМЫ (светлая ↔ тёмная)
+    ------------------------------------------------------------
+    Расположена в правом нижнем углу экрана.
+    - В светлой теме показывается иконка луны (переключить на тёмную).
+    - В тёмной теме показывается иконка солнца (переключить на светлую).
+    Выбор темы сохраняется в localStorage браузера.
+    ============================================================
+  -->
+  <button
+    id="themeToggle"
+    class="theme-toggle"
+    type="button"
+    aria-label="Переключить на тёмную тему"
+    title="Переключить тему"
+  >
+    <!-- Иконка луны — видна в светлой теме -->
+    <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
+    </svg>
+    <!-- Иконка солнца — видна в тёмной теме -->
+    <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12zm0-16v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <script>
+    /*
+      ============================================================
+      1. СПРАВОЧНЫЕ ДАННЫЕ
+      ============================================================
+    */
+
+    const STORAGE_KEY = "male_calorie_calculator_v1";
+    const THEME_STORAGE_KEY = "vibe_calculators_theme";
+
+    /*
+      ============================================================
+      ПЕРЕКЛЮЧЕНИЕ ТЕМЫ (светлая / тёмная)
+      ------------------------------------------------------------
+      Тема задаётся атрибутом data-theme на элементе <html>.
+      Значения: "light" (по умолчанию) или "dark".
+      ============================================================
+    */
+
+    /*
+      Применяет выбранную тему к странице и обновляет подпись кнопки.
+    */
+    function applyTheme(theme) {
+      const html = document.documentElement;
+      const toggleBtn = document.getElementById("themeToggle");
+
+      if (theme === "dark") {
+        html.setAttribute("data-theme", "dark");
+        toggleBtn.setAttribute("aria-label", "Переключить на светлую тему");
+        toggleBtn.title = "Переключить на светлую тему";
+      } else {
+        html.removeAttribute("data-theme");
+        toggleBtn.setAttribute("aria-label", "Переключить на тёмную тему");
+        toggleBtn.title = "Переключить на тёмную тему";
+      }
+    }
+
+    /*
+      Переключает тему по клику на кнопку и сохраняет выбор в localStorage.
+    */
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      const newTheme = isDark ? "light" : "dark";
+
+      applyTheme(newTheme);
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    }
+
+    /*
+      Загружает сохранённую тему при открытии страницы.
+      Если сохранения нет — используется светлая тема.
+    */
+    function initTheme() {
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+
+      if (savedTheme === "dark") {
+        applyTheme("dark");
+      } else {
+        applyTheme("light");
+      }
+
+      document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+    }
+
+    /*
+      База продуктов.
+      Все значения указаны приблизительно на 100 г продукта.
+
+      Поля:
+      name     — название продукта;
+      category — категория;
+      kcal     — килокалории;
+      p        — белки;
+      f        — жиры;
+      c        — углеводы;
+      tags     — теги для фильтрации меню.
+    */
+    let foods = [
+      { name: "Куриная грудка", category: "protein", kcal: 165, p: 31, f: 3.6, c: 0, tags: ["lean", "budget"] },
+      { name: "Бедро индейки", category: "protein", kcal: 155, p: 20, f: 8, c: 0, tags: ["lean", "budget"] },
+      { name: "Говядина постная", category: "protein", kcal: 187, p: 26, f: 9, c: 0, tags: ["iron"] },
+      { name: "Яйцо куриное", category: "protein", kcal: 155, p: 13, f: 11, c: 1.1, tags: ["breakfast"] },
+      { name: "Лосось", category: "protein", kcal: 208, p: 20, f: 13, c: 0, tags: ["omega3"] },
+      { name: "Тунец", category: "protein", kcal: 132, p: 29, f: 1, c: 0, tags: ["lean"] },
+      { name: "Треска", category: "protein", kcal: 82, p: 18, f: 0.7, c: 0, tags: ["lean"] },
+      { name: "Творог 5%", category: "dairy", kcal: 121, p: 17, f: 5, c: 2, tags: ["dairy", "breakfast"] },
+      { name: "Творог 9%", category: "dairy", kcal: 159, p: 16, f: 9, c: 2, tags: ["dairy", "breakfast"] },
+      { name: "Греческий йогурт", category: "dairy", kcal: 97, p: 9, f: 5, c: 3.6, tags: ["dairy"] },
+
+      { name: "Гречка варёная", category: "carb", kcal: 110, p: 3.6, f: 1.1, c: 21.3, tags: ["complex", "budget"] },
+      { name: "Рис варёный", category: "carb", kcal: 130, p: 2.7, f: 0.3, c: 28, tags: ["complex", "budget"] },
+      { name: "Овсянка варёная", category: "carb", kcal: 88, p: 3, f: 1.7, c: 15, tags: ["breakfast", "complex"] },
+      { name: "Картофель отварной", category: "carb", kcal: 87, p: 1.9, f: 0.1, c: 20, tags: ["budget"] },
+      { name: "Макароны из твёрдых сортов варёные", category: "carb", kcal: 131, p: 5, f: 1.1, c: 25, tags: ["complex"] },
+      { name: "Хлеб из зелёной гречки", category: "carb", kcal: 250, p: 8, f: 3, c: 48, tags: ["glutenFree"] },
+      { name: "Фасоль варёная", category: "carb", kcal: 127, p: 8.7, f: 0.5, c: 22.8, tags: ["fiber", "budget"] },
+      { name: "Чечевица варёная", category: "carb", kcal: 116, p: 9, f: 0.4, c: 20, tags: ["fiber", "budget"] },
+
+      { name: "Оливковое масло", category: "fat", kcal: 884, p: 0, f: 100, c: 0, tags: ["fat"] },
+      { name: "Сливочное масло", category: "fat", kcal: 748, p: 0.5, f: 82, c: 0.8, tags: ["fat", "dairy"] },
+      { name: "Авокадо", category: "fat", kcal: 160, p: 2, f: 15, c: 9, tags: ["fat"] },
+      { name: "Грецкие орехи", category: "fat", kcal: 654, p: 15, f: 65, c: 14, tags: ["fat", "magnesium"] },
+      { name: "Миндаль", category: "fat", kcal: 579, p: 21, f: 50, c: 22, tags: ["fat", "magnesium"] },
+
+      { name: "Капуста белокочанная", category: "vegetable", kcal: 27, p: 1.8, f: 0.1, c: 6, tags: ["fiber", "budget"] },
+      { name: "Огурцы", category: "vegetable", kcal: 15, p: 0.7, f: 0.1, c: 3.6, tags: ["lowCalorie"] },
+      { name: "Помидоры", category: "vegetable", kcal: 18, p: 0.9, f: 0.2, c: 3.9, tags: ["lowCalorie"] },
+      { name: "Брокколи", category: "vegetable", kcal: 34, p: 2.8, f: 0.4, c: 6.6, tags: ["fiber"] },
+      { name: "Морковь", category: "vegetable", kcal: 41, p: 0.9, f: 0.2, c: 10, tags: ["fiber"] },
+      { name: "Свёкла", category: "vegetable", kcal: 43, p: 1.6, f: 0.2, c: 10, tags: ["fiber"] },
+      { name: "Шпинат", category: "vegetable", kcal: 23, p: 2.9, f: 0.4, c: 3.6, tags: ["magnesium"] },
+
+      { name: "Яблоко", category: "fruit", kcal: 52, p: 0.3, f: 0.2, c: 14, tags: ["fruit"] },
+      { name: "Банан", category: "fruit", kcal: 89, p: 1.1, f: 0.3, c: 23, tags: ["fruit", "carb"] },
+      { name: "Апельсин", category: "fruit", kcal: 47, p: 0.9, f: 0.1, c: 12, tags: ["fruit"] },
+      { name: "Ягоды", category: "fruit", kcal: 50, p: 1, f: 0.3, c: 12, tags: ["fruit"] }
+    ];
+
+    /*
+      Ориентировочные нормы витаминов и минералов для взрослых мужчин.
+      Единицы сохранены текстом, чтобы не перегружать код конвертацией.
+    */
+    const nutrients = [
+      {
+        name: "Белок",
+        norm: "примерно 1.6–2.2 г/кг при снижении веса или тренировках",
+        role: "Сохранение мышечной массы, восстановление тканей, сытость.",
+        sources: "Мясо, рыба, яйца, творог, йогурт, бобовые.",
+        supplement: "Протеин допустим как удобная еда, если не добирается белок обычным рационом."
+      },
+      {
+        name: "Клетчатка",
+        norm: "около 30–38 г/сутки",
+        role: "Насыщение, работа кишечника, контроль глюкозы и липидов.",
+        sources: "Овощи, бобовые, ягоды, цельные крупы.",
+        supplement: "Псиллиум можно обсуждать при нехватке клетчатки, но вводить постепенно."
+      },
+      {
+        name: "Витамин D",
+        norm: "обычно 15–20 мкг/сутки как ориентир",
+        role: "Кости, мышцы, иммунная регуляция.",
+        sources: "Жирная рыба, яйца, обогащённые продукты, солнце.",
+        supplement: "Только после оценки 25(OH)D или по назначению врача."
+      },
+      {
+        name: "Витамин B12",
+        norm: "около 2.4 мкг/сутки",
+        role: "Нервная система, кроветворение.",
+        sources: "Мясо, рыба, яйца, молочные продукты.",
+        supplement: "Особенно актуально при вегетарианстве, нарушении всасывания, приёме метформина."
+      },
+      {
+        name: "Фолат",
+        norm: "около 400 мкг DFE/сутки",
+        role: "Кроветворение, деление клеток.",
+        sources: "Зелень, бобовые, печень, овощи.",
+        supplement: "После оценки рациона и анализов, не маскировать дефицит B12."
+      },
+      {
+        name: "Витамин C",
+        norm: "около 90 мг/сутки",
+        role: "Коллаген, антиоксидантная защита, усвоение железа.",
+        sources: "Овощи, ягоды, цитрусовые, капуста.",
+        supplement: "Обычно лучше добирать едой; высокие дозы не нужны большинству."
+      },
+      {
+        name: "Магний",
+        norm: "около 400–420 мг/сутки",
+        role: "Нервно-мышечная функция, энергетический обмен.",
+        sources: "Орехи, гречка, зелень, бобовые.",
+        supplement: "Можно обсуждать при судорогах, низком потреблении, стрессе; учитывать почки."
+      },
+      {
+        name: "Кальций",
+        norm: "около 1000–1200 мг/сутки",
+        role: "Кости, мышцы, нервная проводимость.",
+        sources: "Молочные продукты, рыба с костями, зелень.",
+        supplement: "Если рацион беден кальцием; осторожно при камнях в почках."
+      },
+      {
+        name: "Цинк",
+        norm: "около 11 мг/сутки",
+        role: "Иммунная функция, кожа, репродуктивная система.",
+        sources: "Мясо, морепродукты, яйца, орехи.",
+        supplement: "Не принимать долго в высоких дозах без контроля меди."
+      },
+      {
+        name: "Селен",
+        norm: "около 55 мкг/сутки",
+        role: "Щитовидная железа, антиоксидантные ферменты.",
+        sources: "Рыба, яйца, мясо, бразильский орех.",
+        supplement: "Не превышать дозы: избыток селена токсичен."
+      },
+      {
+        name: "Йод",
+        norm: "около 150 мкг/сутки",
+        role: "Синтез гормонов щитовидной железы.",
+        sources: "Йодированная соль, морская рыба, морепродукты.",
+        supplement: "Только осторожно, особенно при заболеваниях щитовидной железы."
+      },
+      {
+        name: "Железо",
+        norm: "около 8 мг/сутки для взрослого мужчины",
+        role: "Гемоглобин, транспорт кислорода.",
+        sources: "Говядина, печень, бобовые, гречка.",
+        supplement: "Мужчинам железо нельзя принимать вслепую. Нужны ферритин, ОАК и врач."
+      },
+      {
+        name: "Омега-3",
+        norm: "рыба 2 раза в неделю или эквивалент EPA/DHA",
+        role: "Сердечно-сосудистая поддержка, противовоспалительный баланс.",
+        sources: "Лосось, сельдь, скумбрия, сардины.",
+        supplement: "Можно обсуждать, если жирная рыба отсутствует; осторожно при антикоагулянтах."
+      },
+      {
+        name: "Калий",
+        norm: "около 3400 мг/сутки",
+        role: "Давление, мышцы, нервная проводимость.",
+        sources: "Картофель, бобовые, овощи, фрукты.",
+        supplement: "Калий в таблетках — только по назначению врача."
+      },
+      {
+        name: "Натрий / соль",
+        norm: "соль желательно ограничивать",
+        role: "Водно-солевой баланс, давление.",
+        sources: "Соль, готовые продукты, колбасы, соусы.",
+        supplement: "БАД не нужен; чаще требуется снижение соли."
+      }
+    ];
+
+    /*
+      ============================================================
+      2. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+      ============================================================
+    */
+
+    function n(id) {
+      return Number(document.getElementById(id).value);
+    }
+
+    function v(id) {
+      return document.getElementById(id).value;
+    }
+
+    function round(value, digits = 0) {
+      const m = Math.pow(10, digits);
+      return Math.round(value * m) / m;
+    }
+
+    function kcalText(value) {
+      return `${Math.round(value)} ккал`;
+    }
+
+    function gramText(value) {
+      return `${Math.round(value)} г`;
+    }
+
+    function getInputs() {
+      return {
+        age: n("age"),
+        height: n("height"),
+        weight: n("weight"),
+        targetWeight: n("targetWeight"),
+        activity: n("activity"),
+        goal: v("goal"),
+        speed: v("speed"),
+        mealsCount: Number(v("mealsCount")),
+        dietStyle: v("dietStyle"),
+        exclude: v("exclude")
+      };
+    }
+
+    /*
+      ============================================================
+      3. РАСЧЁТ КАЛОРИЙ И БЖУ
+      ============================================================
+    */
+
+    function calculateBMR(weight, height, age) {
+      /*
+        Формула Mifflin–St Jeor для мужчин:
+        BMR = 10 × вес + 6.25 × рост - 5 × возраст + 5
+      */
+      return 10 * weight + 6.25 * height - 5 * age + 5;
+    }
+
+    function calculateBMI(weight, height) {
+      const meters = height / 100;
+      return weight / (meters * meters);
+    }
+
+    function classifyBMI(bmi) {
+      if (bmi < 18.5) return "Дефицит массы";
+      if (bmi < 25) return "Нормальный диапазон";
+      if (bmi < 30) return "Избыточная масса";
+      if (bmi < 35) return "Ожирение I степени";
+      if (bmi < 40) return "Ожирение II степени";
+      return "Ожирение III степени";
+    }
+
+    function getCalorieAdjustment(goal, speed, tdee) {
+      /*
+        Ограничиваем экстремальные значения.
+        Для похудения:
+        - мягко: около 10%;
+        - оптимально: около 15–20%;
+        - жёстко: до 25%, но не ниже разумного минимума.
+
+        Для набора:
+        - мягко: +5%;
+        - оптимально: +10%;
+        - жёстко: +15%.
+      */
+
+      if (goal === "maintain") return 0;
+
+      if (goal === "loss") {
+        if (speed === "mild") return -Math.min(300, tdee * 0.10);
+        if (speed === "normal") return -Math.min(600, tdee * 0.18);
+        return -Math.min(800, tdee * 0.25);
+      }
+
+      if (goal === "gain") {
+        if (speed === "mild") return tdee * 0.05;
+        if (speed === "normal") return tdee * 0.10;
+        return tdee * 0.15;
+      }
+
+      return 0;
+    }
+
+    function calculateMacros(targetCalories, weight, goal, dietStyle) {
+      /*
+        Белок:
+        - похудение: выше, чтобы сохранять мышечную массу;
+        - удержание: умеренно;
+        - набор: достаточно высокий.
+
+        Жиры:
+        - не опускаем слишком низко;
+        - ориентир 0.8–1.0 г/кг.
+
+        Углеводы:
+        - остаток калорий после белков и жиров.
+      */
+
+      let proteinPerKg = 1.8;
+      let fatPerKg = 0.8;
+
+      if (goal === "loss") {
+        proteinPerKg = 2.0;
+        fatPerKg = 0.75;
+      }
+
+      if (goal === "maintain") {
+        proteinPerKg = 1.6;
+        fatPerKg = 0.85;
+      }
+
+      if (goal === "gain") {
+        proteinPerKg = 1.8;
+        fatPerKg = 1.0;
+      }
+
+      if (dietStyle === "highProtein") {
+        proteinPerKg += 0.2;
+      }
+
+      if (dietStyle === "lowerCarb") {
+        fatPerKg += 0.15;
+      }
+
+      const protein = weight * proteinPerKg;
+      const fat = weight * fatPerKg;
+
+      const proteinCalories = protein * 4;
+      const fatCalories = fat * 9;
+
+      let carbCalories = targetCalories - proteinCalories - fatCalories;
+
+      if (carbCalories < targetCalories * 0.20) {
+        carbCalories = targetCalories * 0.20;
+      }
+
+      const carbs = carbCalories / 4;
+
+      return {
+        protein,
+        fat,
+        carbs,
+        proteinCalories,
+        fatCalories,
+        carbCalories
+      };
+    }
+
+    function calculateAll() {
+      const input = getInputs();
+
+      if (input.age < 18) {
+        alert("Калькулятор рассчитан только на взрослых мужчин от 18 лет.");
+        return;
+      }
+
+      const bmr = calculateBMR(input.weight, input.height, input.age);
+      const tdee = bmr * input.activity;
+      const adjustment = getCalorieAdjustment(input.goal, input.speed, tdee);
+
+      let targetCalories = tdee + adjustment;
+
+      /*
+        Нижняя граница безопасности для взрослого мужчины.
+        Это не медицинская норма, а защитный ограничитель калькулятора.
+      */
+      if (input.goal === "loss") {
+        targetCalories = Math.max(targetCalories, 1600);
+      }
+
+      const bmi = calculateBMI(input.weight, input.height);
+      const macros = calculateMacros(targetCalories, input.weight, input.goal, input.dietStyle);
+
+      document.getElementById("bmrResult").textContent = kcalText(bmr);
+      document.getElementById("tdeeResult").textContent = kcalText(tdee);
+      document.getElementById("targetCaloriesResult").textContent = kcalText(targetCalories);
+
+      document.getElementById("bmiResult").textContent = round(bmi, 1);
+      document.getElementById("bmiText").textContent = classifyBMI(bmi);
+
+      document.getElementById("proteinResult").textContent = gramText(macros.protein);
+      document.getElementById("fatResult").textContent = gramText(macros.fat);
+      document.getElementById("carbResult").textContent = gramText(macros.carbs);
+
+      renderMainRecommendation(input, bmr, tdee, targetCalories, bmi, macros);
+      renderNutrients();
+
+      return {
+        input,
+        bmr,
+        tdee,
+        targetCalories,
+        bmi,
+        macros
+      };
+    }
+
+    function renderMainRecommendation(input, bmr, tdee, targetCalories, bmi, macros) {
+      const box = document.getElementById("mainRecommendation");
+
+      let goalText = "";
+      if (input.goal === "loss") goalText = "снижение веса";
+      if (input.goal === "maintain") goalText = "удержание веса";
+      if (input.goal === "gain") goalText = "набор массы";
+
+      let riskText = "";
+
+      if (bmi >= 30) {
+        riskText = " При ИМТ 30+ желательно подключить врача: нужно контролировать давление, глюкозу, липиды, печёночные показатели и риски апноэ сна.";
+      }
+
+      if (input.goal === "gain" && bmi >= 28) {
+        riskText += " Набор массы при уже повышенном ИМТ обычно нерационален без силового плана и контроля состава тела.";
+      }
+
+      box.innerHTML = `
+        <strong>Расчёт выполнен.</strong><br>
+        Цель: <b>${goalText}</b>. 
+        Рекомендуемый стартовый калораж: <b>${kcalText(targetCalories)}</b>.
+        Белок: <b>${gramText(macros.protein)}</b>, жиры: <b>${gramText(macros.fat)}</b>, углеводы: <b>${gramText(macros.carbs)}</b>.
+        ${riskText}
+      `;
+    }
+
+    /*
+      ============================================================
+      4. ГЕНЕРАЦИЯ МЕНЮ
+      ============================================================
+    */
+
+    function allowedFoods() {
+      const input = getInputs();
+
+      return foods.filter(food => {
+        if (input.exclude === "noDairy" && food.tags.includes("dairy")) return false;
+        if (input.exclude === "noFish" && (food.name.includes("Лосось") || food.name.includes("Тунец") || food.name.includes("Треска"))) return false;
+        if (input.exclude === "noGluten" && food.name.includes("Макароны")) return false;
+        if (input.exclude === "noPork" && food.name.toLowerCase().includes("свинина")) return false;
+        return true;
+      });
+    }
+
+    function pickFood(category, preferredTags = []) {
+      const list = allowedFoods().filter(f => f.category === category);
+
+      if (preferredTags.length > 0) {
+        const preferred = list.filter(food => preferredTags.some(tag => food.tags.includes(tag)));
+        if (preferred.length > 0) {
+          return preferred[Math.floor(Math.random() * preferred.length)];
+        }
+      }
+
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function foodPortion(food, grams) {
+      const factor = grams / 100;
+
+      return {
+        name: food.name,
+        grams,
+        kcal: food.kcal * factor,
+        p: food.p * factor,
+        f: food.f * factor,
+        c: food.c * factor
+      };
+    }
+
+    function sumMeal(items) {
+      return items.reduce((sum, item) => {
+        sum.kcal += item.kcal;
+        sum.p += item.p;
+        sum.f += item.f;
+        sum.c += item.c;
+        return sum;
+      }, { kcal: 0, p: 0, f: 0, c: 0 });
+    }
+
+    function generateMeal(targetMealKcal, mealType, dietStyle) {
+      /*
+        Простая логика сборки приёма пищи:
+        - основной белок;
+        - углевод;
+        - овощи;
+        - жиры;
+        - при необходимости фрукт или молочный продукт.
+      */
+
+      const items = [];
+
+      let proteinTags = [];
+      let carbTags = ["complex"];
+
+      if (dietStyle === "budget") {
+        proteinTags.push("budget");
+        carbTags.push("budget");
+      }
+
+      if (mealType === "breakfast") {
+        const breakfastProtein = Math.random() > 0.5
+          ? pickFood("protein", ["breakfast"])
+          : pickFood("dairy", ["breakfast"]);
+
+        const breakfastCarb = pickFood("carb", ["breakfast", "complex"]);
+
+        items.push(foodPortion(breakfastProtein, 150));
+        items.push(foodPortion(breakfastCarb, 220));
+        items.push(foodPortion(pickFood("fruit"), 120));
+      } else {
+        items.push(foodPortion(pickFood("protein", proteinTags), 180));
+        items.push(foodPortion(pickFood("carb", carbTags), 220));
+        items.push(foodPortion(pickFood("vegetable"), 250));
+        items.push(foodPortion(pickFood("fat"), 10));
+      }
+
+      let current = sumMeal(items);
+
+      /*
+        Коррекция порции углеводов под целевую калорийность.
+      */
+      if (current.kcal < targetMealKcal * 0.85) {
+        const extraCarb = pickFood("carb", carbTags);
+        items.push(foodPortion(extraCarb, 100));
+      }
+
+      if (current.kcal > targetMealKcal * 1.25) {
+        /*
+          Если приём пищи получился слишком калорийным,
+          уменьшаем самый калорийный элемент.
+        */
+        items.sort((a, b) => b.kcal - a.kcal);
+        items[0].grams = Math.max(50, Math.round(items[0].grams * 0.75));
+        const originalFood = foods.find(f => f.name === items[0].name);
+        const corrected = foodPortion(originalFood, items[0].grams);
+        items[0] = corrected;
+      }
+
+      return items;
+    }
+
+    function generateMenu() {
+      const result = calculateAll();
+
+      if (!result) return;
+
+      const input = result.input;
+      const calories = result.targetCalories;
+      const mealsCount = input.mealsCount;
+
+      let mealPlan = [];
+
+      if (mealsCount === 3) {
+        mealPlan = [
+          { title: "Завтрак", type: "breakfast", share: 0.30 },
+          { title: "Обед", type: "lunch", share: 0.40 },
+          { title: "Ужин", type: "dinner", share: 0.30 }
+        ];
+      }
+
+      if (mealsCount === 4) {
+        mealPlan = [
+          { title: "Завтрак", type: "breakfast", share: 0.25 },
+          { title: "Обед", type: "lunch", share: 0.35 },
+          { title: "Перекус", type: "snack", share: 0.15 },
+          { title: "Ужин", type: "dinner", share: 0.25 }
+        ];
+      }
+
+      if (mealsCount === 5) {
+        mealPlan = [
+          { title: "Завтрак", type: "breakfast", share: 0.22 },
+          { title: "Второй завтрак", type: "snack", share: 0.13 },
+          { title: "Обед", type: "lunch", share: 0.32 },
+          { title: "Перекус", type: "snack", share: 0.13 },
+          { title: "Ужин", type: "dinner", share: 0.20 }
+        ];
+      }
+
+      const generated = mealPlan.map(meal => {
+        let items;
+
+        if (meal.type === "snack") {
+          items = [
+            foodPortion(pickFood("dairy", ["dairy"]), 180),
+            foodPortion(pickFood("fruit"), 150),
+            foodPortion(pickFood("fat"), 8)
+          ];
+
+          if (input.exclude === "noDairy") {
+            items = [
+              foodPortion(pickFood("protein", ["lean"]), 120),
+              foodPortion(pickFood("fruit"), 150),
+              foodPortion(pickFood("fat"), 8)
+            ];
+          }
+        } else {
+          items = generateMeal(calories * meal.share, meal.type, input.dietStyle);
+        }
+
+        return {
+          title: meal.title,
+          target: calories * meal.share,
+          items,
+          total: sumMeal(items)
+        };
+      });
+
+      renderMenu(generated, result);
+    }
+
+    function renderMenu(menu, result) {
+      const output = document.getElementById("menuOutput");
+
+      const dayTotal = menu.reduce((sum, meal) => {
+        sum.kcal += meal.total.kcal;
+        sum.p += meal.total.p;
+        sum.f += meal.total.f;
+        sum.c += meal.total.c;
+        return sum;
+      }, { kcal: 0, p: 0, f: 0, c: 0 });
+
+      const html = menu.map(meal => {
+        const itemsHtml = meal.items.map(item => {
+          return `<li>${item.name} — ${Math.round(item.grams)} г</li>`;
+        }).join("");
+
+        return `
+          <div class="meal">
+            <div class="meal-title">
+              <span>${meal.title}</span>
+              <span class="pill">${kcalText(meal.total.kcal)}</span>
+            </div>
+            <div class="muted small">
+              Б: ${round(meal.total.p, 1)} г /
+              Ж: ${round(meal.total.f, 1)} г /
+              У: ${round(meal.total.c, 1)} г
+            </div>
+            <ul>${itemsHtml}</ul>
+          </div>
+        `;
+      }).join("");
+
+      const comparison = `
+        <div class="meal">
+          <div class="meal-title">
+            <span>Итого за день</span>
+            <span class="pill">${kcalText(dayTotal.kcal)}</span>
+          </div>
+          <div>
+            Цель: <b>${kcalText(result.targetCalories)}</b>.
+            Факт меню: <b>${kcalText(dayTotal.kcal)}</b>.
+            Белки: <b>${round(dayTotal.p, 1)} г</b>,
+            жиры: <b>${round(dayTotal.f, 1)} г</b>,
+            углеводы: <b>${round(dayTotal.c, 1)} г</b>.
+          </div>
+          <div class="muted small" style="margin-top: 8px;">
+            Автоматическое меню является шаблоном. Для точного попадания в БЖУ меняйте граммовки продуктов.
+          </div>
+        </div>
+      `;
+
+      output.innerHTML = html + comparison;
+    }
+
+    /*
+      ============================================================
+      5. ВИТАМИНЫ, МИНЕРАЛЫ, БАДЫ
+      ============================================================
+    */
+
+    function renderNutrients() {
+      const tbody = document.getElementById("nutrientTableBody");
+
+      tbody.innerHTML = nutrients.map(item => {
+        return `
+          <tr>
+            <td><b>${item.name}</b></td>
+            <td>${item.norm}</td>
+            <td>${item.role}</td>
+            <td>${item.sources}</td>
+            <td>${item.supplement}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    /*
+      ============================================================
+      6. БАЗА ПРОДУКТОВ
+      ============================================================
+    */
+
+    function categoryName(category) {
+      const map = {
+        protein: "Белок",
+        carb: "Углеводы",
+        fat: "Жиры",
+        vegetable: "Овощи",
+        fruit: "Фрукты",
+        dairy: "Молочные"
+      };
+
+      return map[category] || category;
+    }
+
+    function renderFoodTable() {
+      const tbody = document.getElementById("foodTableBody");
+      const search = document.getElementById("foodSearch").value.toLowerCase().trim();
+      const category = document.getElementById("foodCategoryFilter").value;
+
+      const filtered = foods.filter(food => {
+        const matchesSearch = food.name.toLowerCase().includes(search);
+        const matchesCategory = category === "all" || food.category === category;
+        return matchesSearch && matchesCategory;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="muted">Продукты не найдены.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(food => {
+        return `
+          <tr>
+            <td><b>${food.name}</b></td>
+            <td>${categoryName(food.category)}</td>
+            <td>${food.kcal}</td>
+            <td>${food.p}</td>
+            <td>${food.f}</td>
+            <td>${food.c}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function addCustomFood() {
+      const name = document.getElementById("customName").value.trim();
+
+      if (!name) {
+        alert("Введите название продукта.");
+        return;
+      }
+
+      const food = {
+        name,
+        category: "protein",
+        kcal: Math.max(0, n("customKcal")),
+        p: Math.max(0, n("customProtein")),
+        f: Math.max(0, n("customFat")),
+        c: Math.max(0, n("customCarbs")),
+        tags: ["custom"]
+      };
+
+      /*
+        Автоматически определяем категорию по преобладающему макронутриенту.
+      */
+      if (food.c > food.p && food.c > food.f) food.category = "carb";
+      if (food.f > food.p && food.f > food.c) food.category = "fat";
+
+      foods.push(food);
+
+      document.getElementById("customName").value = "";
+      renderFoodTable();
+
+      alert("Продукт добавлен в базу текущей страницы.");
+    }
+
+    /*
+      ============================================================
+      7. СОХРАНЕНИЕ, ЗАГРУЗКА, ЭКСПОРТ
+      ============================================================
+    */
+
+    function collectState() {
+      return {
+        age: v("age"),
+        height: v("height"),
+        weight: v("weight"),
+        targetWeight: v("targetWeight"),
+        activity: v("activity"),
+        goal: v("goal"),
+        speed: v("speed"),
+        mealsCount: v("mealsCount"),
+        dietStyle: v("dietStyle"),
+        exclude: v("exclude"),
+        foods,
+        savedAt: new Date().toISOString()
+      };
+    }
+
+    function applyState(data) {
+      document.getElementById("age").value = data.age || 52;
+      document.getElementById("height").value = data.height || 180;
+      document.getElementById("weight").value = data.weight || 107;
+      document.getElementById("targetWeight").value = data.targetWeight || 90;
+      document.getElementById("activity").value = data.activity || "1.2";
+      document.getElementById("goal").value = data.goal || "loss";
+      document.getElementById("speed").value = data.speed || "normal";
+      document.getElementById("mealsCount").value = data.mealsCount || "4";
+      document.getElementById("dietStyle").value = data.dietStyle || "balanced";
+      document.getElementById("exclude").value = data.exclude || "none";
+
+      if (Array.isArray(data.foods)) {
+        foods = data.foods;
+      }
+
+      renderFoodTable();
+      calculateAll();
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
+      alert("Данные сохранены в браузере.");
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+
+      if (!raw) {
+        alert("Сохранённые данные не найдены.");
+        return;
+      }
+
+      try {
+        applyState(JSON.parse(raw));
+        alert("Данные загружены.");
+      } catch (error) {
+        alert("Ошибка загрузки. Данные повреждены.");
+      }
+    }
+
+    function exportReport() {
+      const result = calculateAll();
+
+      if (!result) return;
+
+      const report = {
+        profile: result.input,
+        calculations: {
+          bmr: Math.round(result.bmr),
+          tdee: Math.round(result.tdee),
+          targetCalories: Math.round(result.targetCalories),
+          bmi: round(result.bmi, 1),
+          bmiCategory: classifyBMI(result.bmi),
+          protein: Math.round(result.macros.protein),
+          fat: Math.round(result.macros.fat),
+          carbs: Math.round(result.macros.carbs)
+        },
+        note: "Отчёт является информационным и не заменяет врача или диетолога.",
+        exportedAt: new Date().toISOString()
+      };
+
+      const blob = new Blob([JSON.stringify(report, null, 2)], {
+        type: "application/json"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "male-calorie-report.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetAll() {
+      const confirmed = confirm("Очистить сохранённые данные и вернуть значения по умолчанию?");
+
+      if (!confirmed) return;
+
+      localStorage.removeItem(STORAGE_KEY);
+
+      document.getElementById("age").value = 52;
+      document.getElementById("height").value = 180;
+      document.getElementById("weight").value = 107;
+      document.getElementById("targetWeight").value = 90;
+      document.getElementById("activity").value = "1.2";
+      document.getElementById("goal").value = "loss";
+      document.getElementById("speed").value = "normal";
+      document.getElementById("mealsCount").value = "4";
+      document.getElementById("dietStyle").value = "balanced";
+      document.getElementById("exclude").value = "none";
+
+      calculateAll();
+      renderFoodTable();
+      renderNutrients();
+
+      document.getElementById("menuOutput").innerHTML = `
+        <div class="meal">
+          Нажмите «Составить меню».
+        </div>
+      `;
+    }
+
+    /*
+      ============================================================
+      8. ИНИЦИАЛИЗАЦИЯ
+      ============================================================
+    */
+
+    function init() {
+      renderFoodTable();
+      renderNutrients();
+      calculateAll();
+
+      const inputIds = [
+        "age",
+        "height",
+        "weight",
+        "targetWeight",
+        "activity",
+        "goal",
+        "speed",
+        "mealsCount",
+        "dietStyle",
+        "exclude"
+      ];
+
+      inputIds.forEach(id => {
+        document.getElementById(id).addEventListener("input", calculateAll);
+        document.getElementById(id).addEventListener("change", calculateAll);
+      });
+    }
+
+    /*
+      Запуск приложения после загрузки HTML-документа.
+      Сначала восстанавливаем тему, затем инициализируем калькулятор.
+    */
+    document.addEventListener("DOMContentLoaded", function () {
+      initTheme();
+      init();
+    });
+  </script>
+</body>
+</html>
